@@ -522,7 +522,7 @@ void update7SEG(int index)
 080003b8 <HAL_TIM_PeriodElapsedCallback>:
 
 int counter1 = 100; // Blink led PA5
-int counter2 = 50; // 7seg
+int counter2 = 25; // 7seg
 int dot = 100;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -586,9 +586,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  800040e:	2b00      	cmp	r3, #0
  8000410:	dc12      	bgt.n	8000438 <HAL_TIM_PeriodElapsedCallback+0x80>
 	{
-		counter2 = 50;
+		counter2 = 25;
  8000412:	4b0e      	ldr	r3, [pc, #56]	; (800044c <HAL_TIM_PeriodElapsedCallback+0x94>)
- 8000414:	2232      	movs	r2, #50	; 0x32
+ 8000414:	2219      	movs	r2, #25
  8000416:	601a      	str	r2, [r3, #0]
 		update7SEG(index_led); // Display current led
  8000418:	4b0d      	ldr	r3, [pc, #52]	; (8000450 <HAL_TIM_PeriodElapsedCallback+0x98>)

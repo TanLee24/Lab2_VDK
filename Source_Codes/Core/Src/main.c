@@ -259,7 +259,7 @@ void update7SEG(int index)
 }
 
 int counter1 = 100; // Blink led PA5
-int counter2 = 50; // 7seg
+int counter2 = 25; // 7seg
 int dot = 100;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -280,7 +280,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	counter2--;
 	if (counter2 <= 0)
 	{
-		counter2 = 50;
+		counter2 = 25;
 		update7SEG(index_led); // Display current led
 		index_led = (index_led + 1) % MAX_LED; // Increase index and keep it in range
 	}
