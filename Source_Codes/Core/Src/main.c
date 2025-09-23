@@ -56,7 +56,7 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int hour = 15, minute = 8, second = 50;  // Init values: 15:08
 /* USER CODE END 0 */
 
 /**
@@ -90,6 +90,7 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -99,7 +100,23 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
+	  second++;
+	  if (second >= 60)
+	  {
+		  second = 0;
+		  minute++;
+		  if (minute >= 60)
+		  {
+			  minute = 0;
+			  hour++;
+			  if (hour >= 24)
+			  {
+				  hour = 0;
+			  }
+		  }
+	  }
+	  updateClockBuffer();  // Cập nhật buffer cho LED
+	  HAL_Delay(1000);      // Chờ 1 giây (sẽ thay bằng software timer ở exercise 6)
   }
   /* USER CODE END 3 */
 }
@@ -256,6 +273,21 @@ void update7SEG(int index)
 	default:
 		break;
     }
+}
+
+void updateClockBuffer()
+{
+    // Update hour
+    if (hour >= 24) hour = 0;
+    int temp_hour = hour;
+    led_buffer[0] = temp_hour / 10;  // First num of hour
+    led_buffer[1] = temp_hour % 10;  // Second num of hour
+
+    // Update minute
+    if (minute >= 60) minute = 0;
+    int temp_minute = minute;
+    led_buffer[2] = temp_minute / 10;  // First num of minute
+    led_buffer[3] = temp_minute % 10;  // Second num of minute
 }
 
 int counter1 = 100; // Blink led PA5
