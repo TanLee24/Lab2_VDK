@@ -260,6 +260,7 @@ void update7SEG(int index)
 
 int counter1 = 100; // Blink led PA5
 int counter2 = 50; // 7seg
+int dot = 100;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	counter1--;
@@ -267,6 +268,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		counter1 = 100;
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	}
+
+	dot--;
+	if (dot <= 0)
+	{
+		dot = 100;
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
 	}
 
 	counter2--;
