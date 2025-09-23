@@ -55,6 +55,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void display7SEG(int num);
+void update7SEG(int index);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

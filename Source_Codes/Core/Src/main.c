@@ -226,11 +226,40 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-int counter1 = 100; // Blink led PA5
-int dot = 100;
-int counter2 = 50; // 7seg
-int state = 0;
+const int MAX_LED = 4;
+int index_led = 0;
+int led_buffer[4] = {2, 4, 0, 7}; // My birthday hehe
+void update7SEG(int index)
+{
+    if (index < 0 || index >= MAX_LED) return;  // Check valid index
 
+    // Turn off enable pins
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9, SET);
+
+    // Display numbers from buffer (PB0-PB6)
+    display7SEG(led_buffer[index]);
+
+    switch (index)
+    {
+	case 0:
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, RESET);  // LED1
+		break;
+	case 1:
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);  // LED2
+		break;
+	case 2:
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, RESET);  // LED3
+		break;
+	case 3:
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);  // LED4
+		break;
+	default:
+		break;
+    }
+}
+
+int counter1 = 100; // Blink led PA5
+int counter2 = 50; // 7seg
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	counter1--;
@@ -240,38 +269,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	}
 
-	dot--;
-	if (dot <= 0)
-	{
-		dot = 100;
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-	}
-
 	counter2--;
 	if (counter2 <= 0)
 	{
 		counter2 = 50;
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9, SET);
-		switch(state)
-		{
-		case 0: // led 1
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, RESET);
-			display7SEG(1);
-			break;
-		case 1: // led 2
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET);
-			display7SEG(2);
-			break;
-		case 2: // led 3
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, RESET);
-			display7SEG(3);
-			break;
-		case 3: // led 0
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
-			display7SEG(0);
-			break;
-		}
-		state = (state + 1) % 4; // switch states
+		update7SEG(index_led); // Display current led
+		index_led = (index_led + 1) % MAX_LED; // Increase index and keep it in range
 	}
 }
 
