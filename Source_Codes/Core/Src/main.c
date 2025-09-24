@@ -56,7 +56,10 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int hour = 15, minute = 8, second = 50;  // Init values: 15:08
+int hour = 7, minute = 59, second = 45;  // Init values: 7:59:45
+const int MAX_LED = 4;
+int index_led = 0;
+int led_buffer[4] = {0, 0, 0, 0};
 /* USER CODE END 0 */
 
 /**
@@ -90,33 +93,56 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
-
+  updateClockBuffer();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  setTimer1(25); // Display 7seg leds
+  setTimer2(100); // Update real time
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  second++;
-	  if (second >= 60)
+	  if (timer1_flag == 1)
 	  {
-		  second = 0;
-		  minute++;
-		  if (minute >= 60)
+		  setTimer1(25);
+		  // Scan 7seg led
+		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9, SET);
+		  update7SEG(index_led);  // Display current led
+		  switch (index_led)
 		  {
-			  minute = 0;
-			  hour++;
-			  if (hour >= 24)
+		  case 0: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, RESET); break;  // LED1
+		  case 1: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, RESET); break;  // LED2
+		  case 2: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, RESET); break;  // LED3
+		  case 3: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET); break;  // LED4
+		  }
+		  index_led = (index_led + 1) % MAX_LED;  // Next led
+	  }
+
+	  if (timer2_flag == 1)
+	  {
+		  setTimer2(100);
+		  second++;
+		  if (second >= 60)
+		  {
+			  second = 0;
+			  minute++;
+			  if (minute >= 60)
 			  {
-				  hour = 0;
+				  minute = 0;
+				  hour++;
+				  if (hour >= 24)
+				  {
+					  hour = 0;
+				  }
 			  }
 		  }
+		  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4); // led DOT
+		  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); // led PA5
+		  updateClockBuffer();
 	  }
-	  updateClockBuffer();  // Cập nhật buffer cho LED
-	  HAL_Delay(1000);      // Chờ 1 giây (sẽ thay bằng software timer ở exercise 6)
   }
   /* USER CODE END 3 */
 }
@@ -243,9 +269,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-const int MAX_LED = 4;
-int index_led = 0;
-int led_buffer[4] = {2, 4, 0, 7}; // My birthday hehe
 void update7SEG(int index)
 {
     if (index < 0 || index >= MAX_LED) return;  // Check valid index
@@ -290,32 +313,9 @@ void updateClockBuffer()
     led_buffer[3] = temp_minute % 10;  // Second num of minute
 }
 
-int counter1 = 100; // Blink led PA5
-int counter2 = 25; // 7seg
-int dot = 100;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	counter1--;
-	if (counter1 <= 0)
-	{
-		counter1 = 100;
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	}
-
-	dot--;
-	if (dot <= 0)
-	{
-		dot = 100;
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_4);
-	}
-
-	counter2--;
-	if (counter2 <= 0)
-	{
-		counter2 = 25;
-		update7SEG(index_led); // Display current led
-		index_led = (index_led + 1) % MAX_LED; // Increase index and keep it in range
-	}
+    timerRun();
 }
 
 void display7SEG(int num)
